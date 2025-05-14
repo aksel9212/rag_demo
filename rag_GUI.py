@@ -1,4 +1,4 @@
-isimport os
+import os
 import numpy as np
 import asyncio
 from lightrag import LightRAG, QueryParam
