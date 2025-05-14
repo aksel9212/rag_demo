@@ -1,4 +1,4 @@
-import os
+isimport os
 import numpy as np
 import asyncio
 from lightrag import LightRAG, QueryParam
@@ -28,8 +28,8 @@ WORKING_DIR = "rag-data"
 DOCS_DIR = WORKING_DIR + "/docs"
 if not os.path.exists(WORKING_DIR):
     os.mkdir(WORKING_DIR)
-if not os.path.exists(WORKING_DIR):
-    os.mkdir(WORKING_DIR)
+if not os.path.exists(DOCS_DIR):
+    os.mkdir(DOCS_DIR)
 
 # Groq 
 groq_api_key = st.secrets.groq_api_key #os.getenv("GROQ_API_KEY")
