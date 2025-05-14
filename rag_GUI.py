@@ -50,7 +50,7 @@ ai_provider = st.secrets.ai_provider
 if ai_provider == 'openai':
     emb_model = None
 else:
-    emb_model = None#SentenceTransformer("mixedbread-ai/mxbai-embed-large-v1", truncate_dim=512)
+    emb_model = SentenceTransformer("mixedbread-ai/mxbai-embed-large-v1", truncate_dim=512)
 
 
 async def embedding_func(texts: list[str]) -> np.ndarray:
