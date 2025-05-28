@@ -721,6 +721,24 @@
       "embedding_min": null,
       "embedding_max": null,
       "original_prompt": "uhiu"
+    },
+    "4f7d73859643d6ee64e9d4e2afa31f1f": {
+      "return": "{\"high_level_keywords\": [\"Installation steps\", \"Dachventilator DV Installation\"], \"low_level_keywords\": [\"Wolf\", \"Dachventilator DV\", \"Typenschild\"]}",
+      "cache_type": "keywords",
+      "embedding": null,
+      "embedding_shape": null,
+      "embedding_min": null,
+      "embedding_max": null,
+      "original_prompt": "what are the installation steps to follow?Hier sind weitere Details: Dem Typenschild kann man entnehmen, dass es sich um einen **Dachventilator DV** der Firma **Wolf** handelt."
+    },
+    "b3e08a3460bc056dc0b05fabd70c45fa": {
+      "return": "The Knowledge Base provides information about Wolf GmbH's Dachventilatoren (roof ventilators) and their compliance with various standards and directives.\n\nWolf GmbH manufactures Dachventilator DV and Ventilareur d'extraction DV. The Dachventilatoren, including DV Ventilatoren, are designed with a high degree of operational safety and quality, complying with the EG-Maschinenrichtlinie. These ventilators must be installed, operated, and maintained by trained personnel to prevent damage to the equipment and building.\n\nThe Dachventilator DV complies with several standards and regulations, including DIN EN ISO 13857, DIN EN 60204-1, DIN EN 60730, DIN EN ISO 12100, DIN EN 349, DIN EN 61000-6-2, DIN EN 61000-6-3, Niederspannungsrichtlinie 2006/95/EG, EMV-Richtlinie 2004/108/EG, and Maschinenrichtlinie 2006/42/EG. Similarly, the Ventilareur d'extraction DV complies with Directive 2006/42/EG, Directive 2006/95/EG, Directive 2004/108/EG, DIN EN ISO 12100, DIN EN ISO 13857, DIN EN 349, DIN EN 60204-1, DIN EN 61000-6-2, DIN EN 61000-6-3, and DIN EN 60730.\n\nTechnical data and permissible limit values can be found on the Typenschild (type plate), technical data sheet, or technical catalog.\n\nReferences:\n* [KG] 3062895_201201.pdf (page 8)\n* [KG] 3062895_201201.pdf (page 2)\n* [KG] 3062895_201201.pdf (page 3)\n* [KG] 3062895_201201.pdf (page 24)",
+      "cache_type": "query",
+      "embedding": null,
+      "embedding_shape": null,
+      "embedding_min": null,
+      "embedding_max": null,
+      "original_prompt": "what are the installation steps to follow?Hier sind weitere Details: Dem Typenschild kann man entnehmen, dass es sich um einen **Dachventilator DV** der Firma **Wolf** handelt."
     }
   }
 }

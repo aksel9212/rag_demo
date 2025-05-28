@@ -52,13 +52,9 @@ ai_provider = st.secrets.ai_provider
 if ai_provider == 'openai':
     st.session_state['emb_model'] = None
 else:
-<<<<<<< HEAD
     if "emb_model" not in st.session_state or not st.session_state.emb_model:
         st.session_state['emb_model'] = SentenceTransformer("mixedbread-ai/mxbai-embed-large-v1", truncate_dim=512)
-=======
-    emb_model = SentenceTransformer("mixedbread-ai/mxbai-embed-large-v1", truncate_dim=512)
 
->>>>>>> 273daebf810ac869a1676c958d5a5121fef5d1b6
 
 describe_image_prompt = """
 Anbei ein Foto vom Typenschild eines Geräts. Können Sie daraus bitte den genauen Gerätetyp entnehmen?
