@@ -1,22 +1,14 @@
-import os, json, re, io
+import os
 import numpy as np
 import asyncio
-from collections import defaultdict
-from lightrag import LightRAG, QueryParam
-from lightrag.llm.hf import hf_model_complete, hf_embed
-
-from lightrag.llm.openai import gpt_4o_mini_complete, openai_embed
 
 from sentence_transformers import SentenceTransformer
 from groq import Groq
 from openai import OpenAI
 import google.generativeai as genai
 
-from lightrag.utils import EmbeddingFunc
-from lightrag.kg.shared_storage import initialize_pipeline_status
-import dotenv
 import streamlit as st
-from pypdf import PdfReader, PdfWriter
+from pypdf import PdfReader
 import base64
 from io import BytesIO
 import threading
@@ -24,14 +16,14 @@ from typing import Union
 import av
 from PIL import Image
 import cv2
-from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
+#from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
 
 WORKING_DIR = "rag-data"
 DOCS_DIR = WORKING_DIR + "/docs"
 if not os.path.exists(WORKING_DIR):
     os.mkdir(WORKING_DIR)
-if not os.path.exists(WORKING_DIR):
-    os.mkdir(WORKING_DIR)
+if not os.path.exists(DOCS_DIR):
+    os.mkdir(DOCS_DIR)
 
 # Groq 
 groq_api_key = st.secrets.groq_api_key #os.getenv("GROQ_API_KEY")
@@ -50,10 +42,9 @@ os.environ["OPENAI_API_KEY"] = openai_api_key
 ai_provider = st.secrets.ai_provider
 
 if ai_provider == 'openai':
-    st.session_state['emb_model'] = None
+    emb_model = None
 else:
-    if "emb_model" not in st.session_state or not st.session_state.emb_model:
-        st.session_state['emb_model'] = SentenceTransformer("mixedbread-ai/mxbai-embed-large-v1", truncate_dim=512)
+    emb_model = SentenceTransformer("mixedbread-ai/mxbai-embed-large-v1", truncate_dim=512)
 
 describe_image_prompt = """
 Anbei ein Foto vom Typenschild eines Geräts. Können Sie daraus bitte den genauen Gerätetyp entnehmen?
@@ -61,17 +52,11 @@ Hier ist das Bild:
 """
 async def embedding_func(texts: list[str]) -> np.ndarray:
     print("text to embeddings:",texts)
-    if st.session_state.emb_model:
-        embeddings = st.session_state.emb_model.encode(texts, convert_to_numpy=True)
+    if emb_model:
+        embeddings = emb_model.encode(texts, convert_to_numpy=True)
         return embeddings
     return None
 
-
-embedding_model = EmbeddingFunc(
-            embedding_dim=512,
-            max_token_size=8192,
-            func=embedding_func,
-        )
 
 
 async def llm_model_func_google(
@@ -133,9 +118,11 @@ async def llm_model_func(prompt,**kwargs) -> str:
         messages=[{"role": "user", "content": combined_prompt}],
     )
     return response.choices[0].message.content
+
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode("utf-8")
+
 def llm_model_image_func_groq(images=[],prompt=describe_image_prompt) -> str:
     
     response = groq_client.chat.completions.create(
@@ -184,25 +171,13 @@ async def llm_model_func_deepseek(prompt,**kwargs) -> str:
 gen_llm = llm_model_func
 
 if ai_provider == 'openai':
-    gen_llm = gpt_4o_mini_complete
+    gen_llm = llm_model_func_openai
     embedding_model = openai_embed
 elif ai_provider == 'google':
     gen_llm = llm_model_func_google
 elif ai_provider == 'deepseek':
     gen_llm = llm_model_func_deepseek
 
-
-async def initialize_rag():
-    rag = LightRAG(
-        working_dir=WORKING_DIR,
-        llm_model_func=gen_llm,
-        embedding_func=embedding_model 
-    )
-
-    await rag.initialize_storages()
-    await initialize_pipeline_status()
-
-    return rag
 
 
 def get_pdf_text(pdf_doc):
@@ -220,7 +195,10 @@ def run_new_indexing():
     docs_data = []
     citations = []
     for doc in documents:
-        doc_path = DOCS_DIR+"/"+doc
+        if doc in st.session_state.index:
+            continue
+
+        doc_path = os.path.join(DOCS_DIR,doc)
 
         if os.path.splitext(doc)[1].lower() == '.pdf':
             pdf_pages = get_pdf_text(doc_path)
@@ -232,11 +210,11 @@ def run_new_indexing():
                 docs_data.append(f.read())
                 citations.append(doc_path)
         
-        if len(docs_data) > 10:
-            st.session_state.rag.insert(docs_data,file_paths=citations)
-            docs_data = []
-            citations = []
-    print(docs_data)
+        #if len(docs_data) > 10:
+        #    st.session_state.rag.insert(docs_data,file_paths=citations)
+        #    docs_data = []
+        #    citations = []
+    
     st.session_state.rag.insert(docs_data,file_paths=citations)
     print("Documents indexing DONE!!")
 
@@ -250,110 +228,112 @@ def save_docs(docs):
 
 
 
-#class VideoTransformer(VideoTransformerBase):
-#    frame_lock: threading.Lock  
-#    out_image: Union[np.ndarray, None]
-
-#    def __init__(self) -> None:
-#        self.frame_lock = threading.Lock()
-        
-#        self.out_image = None
-
-#    def transform(self, frame: av.VideoFrame) -> np.ndarray:
-#        out_image = frame.to_ndarray(format="bgr24")
-
-#        with self.frame_lock:
-            
-#            self.out_image = out_image
-#        return out_image
-
-async def remove_file_data(file_to_remove):
+def remove_file_data(file_to_remove):
     try:
         # Read the filenames from index.txt
-        index_file = os.path.join(WORKING_DIR,'kv_store_doc_status.json')
-        with open(index_file, 'r', encoding="utf8") as file:
-            files_ids = json.load(file)
-        ids_to_remove = [i for i,j in files_ids.items() if file_to_remove in j['file_path']]
-        print(ids_to_remove)
-           
-        await asyncio.gather(*(st.session_state.rag.adelete_by_doc_id(doc_id) for doc_id in ids_to_remove))     
+        index_file = os.path.join(WORKING_DIR,'index.txt')
+        with open(index_file, 'r') as file:
+            filenames = file.readlines()
+        
+        # Strip newline characters and clean the list
+        filenames = [filename.strip() for filename in filenames]
+        
+        if file_to_remove not in filenames:
+            print(f"'{file_to_remove}' not found in {index_file}.")
+            #return
+        
+        # Find the index of the file to remove
+        remove_index = filenames.index(file_to_remove)
+        
+        # Remove the filename from the list
+        filenames.pop(remove_index)
+        print(f"Removed '{file_to_remove}' from {index_file}.")
+        
+        # Save the updated filenames back to index.txt
+        with open(index_file, 'w') as file:
+            for filename in filenames:
+                file.write(filename + '\n')
+        
+        # Step 3: Remove the corresponding embedding
+        embeddings_file = os.path.join(EMBS_DIR,'embeddings.npy')
+        embeddings = np.load(embeddings_file)
+        
+        if remove_index >= len(embeddings):
+            print("Error: Index out of range for embeddings.")
+            return
+        
+        # Remove the embedding at the specified index
+        embeddings = np.delete(embeddings, remove_index, axis=0)
+        print(f"Removed embedding at index {remove_index} from {embeddings_file}.")
+        
+        # Save the updated embeddings back to embeddings.npy
+        np.save(embeddings_file, embeddings)
+        
+        # Remove the corresponding description
+        desc_file = os.path.join(WORKING_DIR,'images_descriptions.txt')
+        with open(desc_file, 'r') as file:
+            descriptions = file.readlines()
+        
+        if remove_index >= len(descriptions):
+            print("Error: Index out of range for descriptions.")
+            return
+        
+        # Remove the description at the specified index
+        descriptions.pop(remove_index)
+        print(f"Removed description at index {remove_index} from {desc_file}.")
+        
+        # Save the updated descriptions back to files_desc.txt
+        with open(desc_file, 'w') as file:
+            for description in descriptions:
+                file.write(description)
+
         file_path = os.path.join(DOCS_DIR,file_to_remove)
+        
         if os.path.exists(file_path):
             os.remove(file_path)
         print("All associated data has been removed successfully.")
+        load_index()
+        
         st.rerun()
     except FileNotFoundError as e:
         print(f"Error: {e}")
     except Exception as e:
         print(f"An error occurred: {e}")
 
+def rag(question,database,thredshold=0.4):
 
+    def cosine_similarity(vec1, vec2):
+        vec1 = np.array(vec1)
+        vec2 = np.array(vec2)
+        return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+    
+    query = embedding_func(question)
+    similarities = [cosine_similarity(query, sentence_embedding) for sentence_embedding in database]
+    print(similarities)
+    scores =  sorted([score for score in similarities if score > thredshold],reverse=True)
+    if len(scores) == 0:
+        scores = [max(similarities)]
+    idxs = sorted(range(len(similarities)), key=lambda i: similarities[i], reverse=True)[:len(scores)]
+    # validate results:
+    images = [st.session_state.index[i] for i in idxs][:5]
+    
+    return images
+
+def load_index():
+    st.session_state.index_embs = load_embs()
+    st.session_state.index = load_file('index.txt')
+    st.session_state.descriptions = [desc.split(':',1)[1].strip() for desc in load_file('images_descriptions.txt')]
+    
 
 def main():
     
     st.title("RAG AI Agent (demo)")
-
+    if "index" not in st.session_state:
+        load_index()
+        
     # Initialize chat history in session state if not present
     if "messages" not in st.session_state:
         st.session_state.messages = []
-    
-        
-    with st.sidebar:
-        #ctx = webrtc_streamer(key="snapshot", video_transformer_factory=VideoTransformer)
-        #st.title("Scan a device")
-        #if ctx.video_transformer:
-
-        #    snap = st.button("Capture")
-        #    if snap:
-        #        with ctx.video_transformer.frame_lock:
-        #            out_image = ctx.video_transformer.out_image
-
-        #        if out_image is not None:
-                    
-        #            st.write("Output image:")
-        #            st.image(out_image, channels="BGR")
-                    #my_path = os.path.abspath(os.path.dirname(__file__))       
-                    #cv2.imwrite(os.path.join(my_path, "../Data/"+"filename.jpg"), out_image)
-
-        #        else:
-        #            st.warning("No frames available yet.")
-
-
-
-        new_docs = st.file_uploader("Upload PDF files here and update index.", accept_multiple_files=True)
-        
-        all_documents = os.listdir(DOCS_DIR)
-        
-        st.title("Index content:")
-        st.markdown("""
-            <style>
-                .stVerticalBlock {
-                    gap:0;
-                }
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
-        with st.container(height=200):
-            for filename in all_documents:
-                col1, col2 = st.columns([6, 1])
-                with col1:
-                    st.write(f"📄{filename}")
-                with col2:
-                    if st.button("✖", type='tertiary',key=f'btn-{filename}'):
-                        asyncio.run(remove_file_data(filename))
-
-
-        st.button("",type='tertiary',key='s1')
-        if st.button("Update Index"):
-            save_docs(new_docs)
-            run_new_indexing()
-        st.button("",type='tertiary',key='s2')
-        if st.button("Exit"):
-            st.write("Good Bye...!")
-            st.stop()
-    
-    
     
     # Display all messages from the conversation so far
     # Each message is either a ModelRequest or ModelResponse.
@@ -365,9 +345,48 @@ def main():
         else:
             with st.chat_message("assistant"):
                 st.markdown(msg['content'])    
-
+        
+    with st.sidebar:
+        new_docs = st.file_uploader("Upload PDF files here and update index.", accept_multiple_files=True)
+        
+        all_documents = os.listdir(DOCS_DIR)
+        st.markdown(
+            """
+            <style>
+            .custom-scroll-area {
+                max-height: 6cm;
+                overflow-y: auto;
+                background-color: rgba(200, 200, 200, 0.3);  /* light gray with more opacity */
+                padding: 10px;
+                border-radius: 5px;
+                margin-bottom: 20px;
+            }
+            .custom-scroll-area >p{
+                margin-bottom:0;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+        docs_area = "<div class='custom-scroll-area'>"
+        docs_area += f"<h3>Index content:</h3>"
+        for doc in all_documents:
+            docs_area += f"<p>📄 {doc}</p>"
+        docs_area += "</div>"
+        st.markdown(docs_area, unsafe_allow_html=True)
+    
+        
+        if st.button("Update Index"):
+            save_docs(new_docs)
+            run_new_indexing()
+        if st.button("Exit"):
+            st.write("Good Bye...!")
+            st.stop()      
+    # Chat input for the user
+    
+    
+    
     user_input = st.chat_input("What do you want to know?")
-    st.divider()
     uploaded_image = st.file_uploader("Search by image", type=["jpg", "jpeg", "png"])
 
     if user_input:
@@ -388,52 +407,14 @@ def main():
             full_response = ""
             
             # Properly consume the async generator with async for
-            response = st.session_state.rag.query(
-                        query=user_input,
-                        param=QueryParam(mode="local", top_k=5),
-            )
+            response = rag()
             
             # Final response without the cursor
             response = response.replace("###",'')
             st.markdown(response)
-            
-            
-            pattern = r"\[\w+\]\s+(.*?\.pdf)\s+\(page\s+(\d+)\)"
-            matches = re.findall(pattern, response)
-            grouped_pages = defaultdict(list)
-            for match in matches:
-                file_name, page = match[0], int(match[1])
-                grouped_pages[file_name].append(page)
-            
-            grouped_pages = dict(grouped_pages)
-            if len(grouped_pages): 
-                writer = PdfWriter()
-                for file, pages in grouped_pages.items():
-                    reader = PdfReader(os.path.join(DOCS_DIR,file))
-                    total_pages = len(reader.pages)
-                    pages = [p - 1 for p in pages if 1 <= p <= total_pages]
-                    for page_index in pages:
-                        writer.add_page(reader.pages[page_index])
-                
-                pdf_buffer = io.BytesIO()
-                writer.write(pdf_buffer)
-                pdf_buffer.seek(0)
-                st.session_state["pdf_content"] = base64.b64encode(pdf_buffer.getvalue()).decode("utf-8")
-                if st.session_state["pdf_content"]:
-                    pdf_display = f'<iframe src="data:application/pdf;base64,{st.session_state["pdf_content"]}" width="650" height="600" type="application/pdf"></iframe>'
-                    st.markdown(pdf_display, unsafe_allow_html=True)
-        
-                    if st.button("Close PDF Viewer"):
-                        st.session_state["pdf_content"] = None
-                        st.rerun()
-
-
             st.session_state.messages.append({'role':'assistant','content':response})
             print(response)
 
 
 if __name__ == "__main__":
-    if "rag" not in st.session_state:
-        st.session_state.rag = asyncio.run(initialize_rag())
-        run_new_indexing()
     main()
