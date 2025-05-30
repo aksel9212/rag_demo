@@ -50,7 +50,7 @@ os.environ["OPENAI_API_KEY"] = openai_api_key
 ai_provider = st.secrets.ai_provider
 
 if ai_provider == 'openai':
-    st.session_state['emb_model'] = None
+    st.session_state['emb_model'] = openai_embed
 else:
     if "emb_model" not in st.session_state or not st.session_state.emb_model:
         st.session_state['emb_model'] = SentenceTransformer("mixedbread-ai/mxbai-embed-large-v1", truncate_dim=512)
@@ -186,7 +186,6 @@ gen_llm = llm_model_func
 
 if ai_provider == 'openai':
     gen_llm = gpt_4o_mini_complete
-    embedding_model = openai_embed
 elif ai_provider == 'google':
     gen_llm = llm_model_func_google
 elif ai_provider == 'deepseek':
@@ -197,7 +196,7 @@ async def initialize_rag():
     rag = LightRAG(
         working_dir=WORKING_DIR,
         llm_model_func=gen_llm,
-        embedding_func=embedding_model 
+        embedding_func=st.session_state['emb_model'] 
     )
 
     await rag.initialize_storages()
@@ -218,26 +217,31 @@ def get_pdf_text(pdf_doc):
 
 def run_new_indexing():
     documents = os.listdir(DOCS_DIR)
+    
     docs_data = []
     citations = []
     for doc in documents:
-        doc_path = DOCS_DIR+"/"+doc
 
+        doc_path = DOCS_DIR+"/"+doc
+        
         if os.path.splitext(doc)[1].lower() == '.pdf':
             pdf_pages = get_pdf_text(doc_path)
             docs_data += pdf_pages
             #citations += [doc_path] * len(pdf_pages)
             citations += [doc + f" (page {i+1})" for i in range(len(pdf_pages))]
+            
         else:
             with open(doc_path,'r') as f:
                 docs_data.append(f.read())
                 citations.append(doc_path)
         
         if len(docs_data) > 10:
+            
             st.session_state.rag.insert(docs_data,file_paths=citations)
+            
             docs_data = []
             citations = []
-    print(docs_data)
+    
     st.session_state.rag.insert(docs_data,file_paths=citations)
     print("Documents indexing DONE!!")
 
@@ -436,5 +440,6 @@ def main():
 if __name__ == "__main__":
     if "rag" not in st.session_state:
         st.session_state.rag = asyncio.run(initialize_rag())
+        
         run_new_indexing()
     main()
