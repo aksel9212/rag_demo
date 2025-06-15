@@ -1,0 +1,1 @@
+Der Raumtemperatur-Offset kann zwischen -5,0 K und +5,0 K eingestellt werden, die Werkseinstellung ist 0,0 K. Dies dient zur Heizkennlinienverschiebung. Die Einstellung ist nur relevant, wenn die Regelungsart auf "Raumtemperaturgeführt" eingestellt ist (siehe Seite 33) [from table Tab. 13 Navigator Servicemenü EINSTELLUNG\HEIZKR. 1].

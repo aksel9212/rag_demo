@@ -1,0 +1,1 @@
+Die Servicefunktion 1.7d ermöglicht den Anschluss eines externen Vorlauftemperaturfühlers, z. B. für eine hydraulische Weiche [from table Tab. 11 Menü 1]. Mögliche Einstellungen sind: 0 für keinen angeschlossenen externen Vorlauftemperaturfühler, 1 für Anschluss am Basiscontroller und 2 für Anschluss am Weichenmodul. Die Grundeinstellung ist 0.

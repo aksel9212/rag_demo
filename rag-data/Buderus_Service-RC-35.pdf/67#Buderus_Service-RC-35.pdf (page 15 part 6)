@@ -1,0 +1,1 @@
+Im Automatik-Betrieb leuchtet zusätzlich zur LED "AUT" die LED zur Anzeige des aktuellen Betriebszustandes ("Tag" oder "Nacht"). Bei Heizkesseln mit UBA1.x leuchtet nur die LED "AUT". Die LED "Warmwasser" kann auch abgeschaltet werden. Bei Heizkesseln mit UBA1.x leuchtet die LED "Warmwasser" gar nicht.

@@ -1,0 +1,1 @@
+Die Servicefunktionen 2.1H "Pumpenleistung bei minimaler Heizleistung" und 2.1J "Pumpenleistung bei maximaler Heizleistung" [from table Tab. 12 Menü 2] sind nur aktiv, wenn Pumpenkennfeld 0 (Servicefunktion 2.1C) eingestellt ist. Der Einstellbereich liegt jeweils zwischen 10% und 100%. Die Grundeinstellung beträgt für minimale Heizleistung 10% und für maximale Heizleistung 100%.

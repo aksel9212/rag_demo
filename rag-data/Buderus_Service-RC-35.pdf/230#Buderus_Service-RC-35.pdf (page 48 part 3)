@@ -1,0 +1,1 @@
+Bei Heizkesseln mit UBA1.x, DBA oder UBA-H3 werden nur die Parameter des RC35 zurückgesetzt, nicht jedoch die Parameter des Feuerungsautomaten. Die Funktion zum Zurücksetzen der Wartungsmeldung und der Betriebsstunden ist bei Heizkesseln mit UBA1.x oder DBA nicht möglich.

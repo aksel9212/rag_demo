@@ -1,0 +1,1 @@
+Je größer der Parameter "maximaler Raumeinfluss" eingestellt ist, desto größer ist der Anteil der Raumtemperatur an der Gestaltung der Heizkennlinie (Werkseinstellung 0 Kelvin). Dies gilt sowohl für Über- als auch für Unterschreitungen der Raum-Soll-Temperatur. Solange der Parameter "maximaler Raumeinfluss" auf 0 gestellt ist, arbeitet die Regelung rein außentemperaturgeführt.

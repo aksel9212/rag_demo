@@ -1,0 +1,1 @@
+Die Servicefunktionen i22 und i23 beziehen sich auf die KIM (Kesselidentifikationsmodul). Die letzten drei Stellen der KIM-Nummer werden angezeigt [from table Tab. 10 Menü Info]. Das KIM bestimmt die Gerätefunktionen. Wenn das Gerät von Erdgas auf Flüssiggas umgebaut wurde (oder umgekehrt), muss das KIM ausgetauscht werden. Die Funktion i23 zeigt die KIM-Version an.

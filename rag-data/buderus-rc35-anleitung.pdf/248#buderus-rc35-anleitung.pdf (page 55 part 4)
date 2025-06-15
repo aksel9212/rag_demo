@@ -1,0 +1,1 @@
+Unter "BEDIENERDESINFEKTION" wird eingestellt, ob eine thermische Desinfektion durchgeführt werden soll (ja/nein). Bei Aktivierung können Temperatur, Zeitpunkt und Tag eingegeben werden. Die Kalibrierung der Raumtemperatur erfolgt über "BEDIENER RAUMTEMP", wobei ein Korrekturwert zwischen 1,4K und 22,3°C eingestellt werden kann.

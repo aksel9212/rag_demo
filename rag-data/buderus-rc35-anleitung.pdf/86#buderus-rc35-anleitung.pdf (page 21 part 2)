@@ -1,0 +1,1 @@
+In den Anzeigen für Außentemperaturverlauf und solaren Zugewinn wird der Graph alle 15 Minuten aktualisiert und um 0:00 Uhr ein neuer Graph begonnen. Zwischen 0:00 und 0:14 Uhr erfolgt keine Anzeige für den aktuellen Tag. Die Minimal- und Maximalwerte werden dynamisch angepasst.

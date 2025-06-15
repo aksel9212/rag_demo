@@ -1,0 +1,1 @@
+Die Servicefunktion i08 misst den Ionisationsstrom [from table Tab. 10 Menü Info]. Bei laufendem Brenner bedeutet ein Wert von ≥ 2 µA, dass alles in Ordnung ist, während < 1 µA auf einen Fehler hinweist. Bei ausgeschaltetem Brenner bedeutet < 2 µA, dass alles in Ordnung ist, und ≥ 2 µA deutet auf einen Fehler hin.

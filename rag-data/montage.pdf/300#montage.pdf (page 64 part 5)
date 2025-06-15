@@ -1,0 +1,1 @@
+Die Störungen 7L (Code 261) und 7L (Code 280), die jeweils einen Zeitfehler bei erster Sicherheitszeit bzw. einen Zeitfehler bei Wiederanlaufversuch anzeigen, werden durch den Austausch des Basiscontrollers BC25 behoben [from table Tab. 25 Verriegelnde Störungen].

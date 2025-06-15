@@ -1,0 +1,1 @@
+In der Werkseinstellung werden Änderungen der Außentemperatur mit einer Verzögerung von drei Stunden (30 x 6 Minuten = 180 Minuten) in die Berechnung der außentemperaturgeführten Regelung einbezogen. Um die berechnete gedämpfte und die aktuell gemessene Außentemperatur zu kontrollieren, kann man das Menü "Diagnose\Monitorwert Kessel/Brenner" öffnen.

@@ -1,0 +1,1 @@
+Die Servicefunktion 1.S1 dient zur Aktivierung eines angeschlossenen Solarmoduls [from table Tab. 11 Menü 1]. Diese Funktion ist nur verfügbar, wenn ein Solarmodul im System erkannt wurde. Die möglichen Einstellungen sind: 0 für keine Solarfunktion und 1 für Solarfunktion aktiv. Die Grundeinstellung ist 0.

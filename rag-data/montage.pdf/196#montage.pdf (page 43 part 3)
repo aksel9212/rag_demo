@@ -1,0 +1,1 @@
+Die Servicefunktion 2.CL, "Zirkulationspumpe" [from table Tab. 12 Menü 2], dient zur Aktivierung einer angeschlossenen Zirkulationspumpe. Diese Funktion ist nur verfügbar, wenn eine Zirkulationspumpe im System erkannt wurde. Die möglichen Einstellungen sind: 0: Zirkulationspumpe nicht aktiv, 1: Zirkulationspumpe aktiv. Die Grundeinstellung ist 0.
